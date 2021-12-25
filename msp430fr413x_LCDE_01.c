@@ -53,7 +53,7 @@
 //
 //                MSP430FR4133
 //             -----------------
-//         /|\|                 |
+//            /|\|                 |
 //          | |              XIN|--
 // GND      --|RST              |  ~32768Hz
 //  |         |             XOUT|--
@@ -163,11 +163,14 @@ int main( void )
     // Configure LCD pins
     SYSCFG2 |= LCDPCTL;                                        // Devices Without Smart Analog Combo SYSCFG2 Register의 R13/R23/R33/LCDCAP0/LCDCAP1 pins selected
 
-    LCDPCTL0 = 0xFFFF;
-    LCDPCTL1 = 0x07FF;
-    LCDPCTL2 = 0x00F0;                                         // L0~L26 & L36~L39 pins selected
+    LCDPCTL0 = 0xFFFF;  //L0 ~ L15
+    LCDPCTL1 = 0x07FF;  //L16 ~ L26
+    LCDPCTL2 = 0x00F0;   //LL36 ~ L39                                      // L0~L26 & L36~L39 pins selected
 
-    LCDCTL0 = LCDSSEL_0 | LCDDIV_7;                            // flcd ref freq is xtclk
+    //LCDSSEL : 클럭, LCDON = 0일 때만 변겅 가능 
+    //LCDDIV : LCD 주파수 분배기, LCDON = 0일 때만 변겅 가능 
+    
+    LCDCTL0 = LCDSSEL_0 | LCDDIV_7;                            // flcd ref freq is xtclk (flcd 참조 주파수는 xtclk)
 
     // LCD Operation - Mode 3, internal 3.08v, charge pump 256Hz
     LCDVCTL = LCDCPEN | LCDREFEN | VLCD_6 | (LCDCPFSEL0 | LCDCPFSEL1 | LCDCPFSEL2 | LCDCPFSEL3); //charge pump |R13내부기준전압 활성화| 내부기준 전압선택(VLCD = 2.96V)|증폭할 주파수(1111 = 256Hz)
@@ -177,6 +180,8 @@ int main( void )
     LCDCSSEL0 = 0x000F;                                        // Configure COMs and SEGs  // L0, L1, L2, L3: COM pins
     LCDCSSEL1 = 0x0000;                                       
     LCDCSSEL2 = 0x0000;
+
+    // LCD Memory for Static to 4-Mux Mode ? Example for 4-Mux Mode With 240 Segments
 
     LCDM0 = 0x21;                                              // L0 = COM0, L1 = COM1
     LCDM1 = 0x84;                                              // L2 = COM2, L3 = COM3
@@ -190,7 +195,8 @@ int main( void )
     LCDMEM[pos6] = digit[6];
 
     LCDCTL0 |= LCD4MUX | LCDON;                                // Turn on LCD, 4-mux selected
-
+    
+    //PMMCTL  제어를 위한 PMM암호
     PMMCTL0_H = PMMPW_H;                                       // Open PMM Registers for write
     PMMCTL0_L |= PMMREGOFF_L;                                  // and set PMMREGOFF
 
